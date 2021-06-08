@@ -1,34 +1,25 @@
 #include<functional>
 #include<list>
 #include<stdexcept>
-#include<vector>
 #include<utility>
+#include<vector>
 
+using std::initializer_list;
+using std::list;
+using std::pair;
+using std::vector;
+  
 template<class KeyType, class ValueType, class Hash = std::hash<KeyType>> 
 class HashMap {
-private:
-	static inline size_t SIZE_MULTIPLIER = 2;
-	Hash hasher;
-	std::list<std::pair<const KeyType, ValueType>> content;
-	std::vector<std::vector<typename std::list<std::pair<const KeyType, ValueType>>::iterator>> table;
-	size_t sz = 0;
-
-	void rescale() {
-		table.assign(SIZE_MULTIPLIER * sz, 
-			std::vector<typename std::list<std::pair<const KeyType, ValueType>>::iterator>());
-		for (auto it = content.begin(); it != content.end(); ++it) {
-			table[hasher(it->first) % table.size()].push_back(it);
-		}
-	}
-
 public:
+
 	class iterator;
 	class const_iterator;
 
-	HashMap(const Hash& hash_func = Hash()) : hasher(hash_func) {}
-
-
-
+	HashMap(const Hash& hash_func = Hash()) : 
+					hasher(hash_func) 
+					{}
+   
 	size_t size() const noexcept {
 		return sz;
 	}
@@ -79,9 +70,11 @@ public:
 		return end();
 	}
  
-	std::pair<bool, iterator> insert(const std::pair<const KeyType, ValueType>& elem) {
+	pair<bool, iterator> insert(const pair<const KeyType, ValueType>& elem) {
 		auto it = find(elem.first);
-		if (it != end()) return {false, it};
+		if (it != end()) {
+			return {false, it};
+		}
 		++sz;
 		content.push_back(elem);
 		if (sz >= table.size()) {
@@ -93,7 +86,7 @@ public:
 	}
 
 	template<class InputIt>
-	void insertRange(InputIt first, InputIt last) {
+	void insert_range(InputIt first, InputIt last) {
 		while (first != last) {
 			insert(*first);
 			++first;
@@ -101,12 +94,12 @@ public:
 	}
 
 	HashMap& operator=(const HashMap& other) {
-		std::list<std::pair<const KeyType, ValueType>> copy_other(other.content);
+		list<pair<const KeyType, ValueType>> copy_other(other.content);
 		hasher = other.hasher;
 		content.clear();
 		table.clear();
 		sz = 0;
-		insertRange(copy_other.begin(), copy_other.end());
+		insert_range(copy_other.begin(), copy_other.end());
 		return *this;
 	}
 
@@ -128,16 +121,19 @@ public:
 	}
 
 	template<class InputIt>
-	HashMap(InputIt first, InputIt last, const Hash& hash_func = Hash()) : hasher(hash_func) {
+	HashMap(InputIt first, InputIt last, const Hash& hash_func = Hash()) : 
+					hasher(hash_func) 
+					{
 		while (first != last) {
 			insert(*first);
 			++first;
 		}
 	}
 
-	HashMap(std::initializer_list<std::pair<KeyType, ValueType>> build_from, 
+	HashMap(initializer_list<pair<KeyType, ValueType>> build_from, 
 										const Hash& hash_func = Hash()) : 
-								HashMap(build_from.begin(), build_from.end(), hash_func) {}
+							HashMap(build_from.begin(), build_from.end(), hash_func) 
+							{}
 
 	ValueType& operator[](const KeyType& key) {
 		auto res = insert({key, ValueType()});
@@ -158,15 +154,18 @@ public:
 
 	class iterator {
 	private:
-		typename std::list<std::pair<const KeyType, ValueType>>::iterator it;
+		typename list<pair<const KeyType, ValueType>>::iterator it;
 
 	public:
-		iterator() {}
+		iterator() = default;
 
-		iterator(const iterator& other_it) : it(other_it.it) {}
+		iterator(const iterator& other_it) : 
+						it(other_it.it) 
+						{}
 
-		iterator(typename std::list<std::pair<const KeyType, ValueType>>::iterator other_it) : 
-				it(other_it) {}
+		iterator(typename list<pair<const KeyType, ValueType>>::iterator other_it) : 
+						it(other_it) 
+						{}
 
 		iterator& operator=(const iterator& other) {
 			it = other.it;
@@ -184,11 +183,11 @@ public:
 			return new_it;
 		}
 
-		std::pair<const KeyType, ValueType>& operator*() const {
+		pair<const KeyType, ValueType>& operator*() const {
 			return *it;
 		}
 
-		std::pair<const KeyType, ValueType>* operator->() const {
+		pair<const KeyType, ValueType>* operator->() const {
 			return it.operator->();
 		}
 
@@ -203,15 +202,18 @@ public:
 
 	class const_iterator {
 	private:
-		typename std::list<std::pair<const KeyType, ValueType>>::const_iterator it;
+		typename list<pair<const KeyType, ValueType>>::const_iterator it;
 
 	public:
-		const_iterator() {}
+		const_iterator() = default;
 
-		const_iterator(const const_iterator& other) : it(other.it) {}
+		const_iterator(const const_iterator& other) : 
+							it(other.it) 
+							{}
 
-		const_iterator(typename std::list<std::pair<const KeyType, ValueType>>::const_iterator other_it) : 
-				it(other_it) {}
+		const_iterator(typename list<pair<const KeyType, ValueType>>::const_iterator other_it) : 
+							it(other_it) 
+							{}
 
 		const_iterator& operator=(const const_iterator& other) {
 			it = other.it;
@@ -229,11 +231,11 @@ public:
 			return new_it;
 		}
 
-		const std::pair<const KeyType, ValueType>& operator*() const {
+		const pair<const KeyType, ValueType>& operator*() const {
 			return *it;
 		}
 
-		const std::pair<const KeyType, ValueType>* operator->() const {
+		const pair<const KeyType, ValueType>* operator->() const {
 			return it.operator->();
 		}
 
@@ -245,4 +247,19 @@ public:
 			return it != other.it;
 		}
 	};
+
+private:
+	constexpr static inline size_t SIZE_MULTIPLIER = 2;
+	Hash hasher;
+	list<pair<const KeyType, ValueType>> content;
+	vector<vector<typename list<pair<const KeyType, ValueType>>::iterator>> table;
+	size_t sz = 0;
+
+	void rescale() {
+		table.assign(SIZE_MULTIPLIER * sz, 
+			vector<typename list<pair<const KeyType, ValueType>>::iterator>());
+		for (auto it = content.begin(); it != content.end(); ++it) {
+			table[hasher(it->first) % table.size()].push_back(it);
+		}
+	}
 };  

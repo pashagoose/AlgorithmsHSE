@@ -78,7 +78,7 @@ public:
 		++sz;
 		content.push_back(elem);
 		if (sz >= table.size()) {
-			rescale();
+			Rescale();
 		} else {
 			table[hasher(elem.first) % table.size()].push_back(--content.end());
 		}
@@ -86,7 +86,7 @@ public:
 	}
 
 	template<class InputIt>
-	void insert_range(InputIt first, InputIt last) {
+	void InsertRange(InputIt first, InputIt last) {
 		while (first != last) {
 			insert(*first);
 			++first;
@@ -99,7 +99,7 @@ public:
 		content.clear();
 		table.clear();
 		sz = 0;
-		insert_range(copy_other.begin(), copy_other.end());
+		InsertRange(copy_other.begin(), copy_other.end());
 		return *this;
 	}
 
@@ -116,7 +116,7 @@ public:
 			}
 		}
 		if (sz * SIZE_MULTIPLIER * SIZE_MULTIPLIER < table.size()) {
-			rescale();
+			Rescale();
 		}
 	}
 
@@ -255,7 +255,7 @@ private:
 	vector<vector<typename list<pair<const KeyType, ValueType>>::iterator>> table;
 	size_t sz = 0;
 
-	void rescale() {
+	void Rescale() {
 		table.assign(SIZE_MULTIPLIER * sz, 
 			vector<typename list<pair<const KeyType, ValueType>>::iterator>());
 		for (auto it = content.begin(); it != content.end(); ++it) {
